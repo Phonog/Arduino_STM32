@@ -272,8 +272,14 @@ CAN_STATUS can_filter(CAN_Port* CANx, uint8 filter_idx, CAN_FIFO fifo, CAN_FILTE
 	else
 		CANx->FS1R &= ~mask;
 
-	CANx->sFilterRegister[filter_idx].FR1 = fr1;
-	CANx->sFilterRegister[filter_idx].FR2 = fr2;
+	if (fr1 > 0x7ff || fr2 > 0x7ff) {
+		CANx->sFilterRegister[filter_idx].FR1 = (fr1 << 3) | CAN_ID_EXT;
+		CANx->sFilterRegister[filter_idx].FR2 = (fr2 << 3) | CAN_ID_EXT;	
+	}
+	else {
+		CANx->sFilterRegister[filter_idx].FR1 = (fr1 << 21);
+		CANx->sFilterRegister[filter_idx].FR2 = (fr2 << 21);	
+	}
 
 	if (mode == CAN_FILTER_MASK)
 		CANx->FM1R &= ~mask;
